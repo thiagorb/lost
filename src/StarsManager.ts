@@ -12,7 +12,6 @@ class MapperStorage<T> {
     ) {
         this.storage = [];
         this.step = (maxValue - minValue) / length;
-        console.log(this.length);
         
         for (let i = 0; i < length; i++) {
             this.storage.push(undefined);

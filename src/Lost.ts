@@ -14,9 +14,21 @@ const STARS = 1000;
 const MIN_Z = 0.1;
 const MAX_Z = 0.9;
 
+const border = [
+    viewSize[0] / MIN_Z,
+    viewSize[1] / MIN_Z
+];
+
 const nextP = (position: Vectorial.Vector2D, coord: 0 | 1, speed: Vectorial.Vector2D) => {
     position[coord] = (position[coord] + speed[coord] + roomSize[coord] - border[coord] - border[coord] / 2) % (roomSize[coord] - border[coord]) + border[coord] / 2;
 };
+
+const constrain = (x: number, min: number, max: number) => {
+    const delta = max - min;
+    return (x - min - delta * Math.floor(x / delta)) % delta + min;
+};
+
+const constrainDeltaAngle = (x: number) => constrain(x, -Math.PI, Math.PI);
 
 class RenderableCircle extends Geometry.Circle implements Game.Renderable, Game.Steppable {
     private color: string;
@@ -59,11 +71,6 @@ class RenderableCircle extends Geometry.Circle implements Game.Renderable, Game.
 class Planet extends RenderableCircle {
 }
 
-const border = [
-    viewSize[0] / MIN_Z,
-    viewSize[1] / MIN_Z
-];
-
 export class GameView extends Game.GameView {
     constructor(canvas: HTMLCanvasElement) {
         super(canvas);
@@ -97,22 +104,12 @@ export class GameView extends Game.GameView {
         
         this.addRenderObject(stars);
 
-        console.log(stars);
         this.addObject(ship);
 
         const planet = new Planet([roomSize[0] / 2 + 1400, roomSize[1] / 2 + 1300], 500, "#55D");
         this.addObject(planet);
 
         let breaking = false;
-
-        const constrain = (x: number, min: number, max: number) => {
-            const delta = max - min;
-            return (x - min - delta * Math.floor(x / delta)) % delta + min;
-        };
-
-        const constrainDeltaAngle = (x: number) => constrain(x, -Math.PI, Math.PI);
-        
-        const isNegative = (n: number) => n < 0;
 
         this.addKeyListener(Game.Keys.SPACE, () => {
             if (ship.landed || ship.dead) {
@@ -233,40 +230,4 @@ export class GameView extends Game.GameView {
     start() {
         super.start(SPS);
     }
-}
-
-function rectangle(width: number, height: number, center?: boolean) {
-    var halfWidth = center? width / 2 : 0;
-    var halfHeight = center? height / 2 : 0;
-    return [
-        [-halfWidth, -halfHeight, 1],
-        [width - halfWidth, - halfHeight, 1],
-        [width - halfWidth, height - halfHeight, 1],
-        [-halfWidth, height - halfHeight, 1]
-    ];
-}
-
-function gear(tooth: number, teethWidth1: number, teethWidth2: number, teethHeight: number, scale: number) {
-    var vertices = new Array<Array<number>>();
-    for (var i = 0; i < tooth; i++) {
-        var toothDegree = i * (Math.PI * 2 / tooth);
-        var toothDegree90 = i * (Math.PI * 2 / tooth) + Math.PI / 2;
-        var cos = Math.cos(toothDegree);
-        var cos90 = Math.cos(toothDegree90);
-        var sin = Math.sin(toothDegree);
-        var sin90 = Math.sin(toothDegree90);
-        vertices.push([scale * (cos * teethHeight - cos90 * teethWidth2), scale * (sin * teethHeight - sin90 * teethWidth2)]);
-        vertices.push([scale * (cos - cos90 * teethWidth1), scale * (sin - sin90 * teethWidth1)]);
-        vertices.push([scale * (cos + cos90 * teethWidth1), scale * (sin + sin90 * teethWidth1)]);
-        vertices.push([scale * (cos * teethHeight + cos90 * teethWidth2), scale * (sin * teethHeight + sin90 * teethWidth2)]);
-    }
-    return vertices;
-}
-
-function circle(radius: number, steps: number) {
-    var vertices = [];
-    for (var i = 0; i < steps; i++) {
-        vertices.push([Math.cos(Math.PI * 2 * i / steps) * radius, Math.sin(Math.PI * 2 * i / steps) * radius, 1]);
-    }
-    return vertices;
 }

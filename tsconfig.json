@@ -3,6 +3,8 @@
         "target": "es5",
         "out": "dist/app.js",
         "watch": true,
-        "outDir": "dist"
+        "module": "commonjs",
+        "outDir": "dist",
+        "noImplicitAny": true
     }
 }

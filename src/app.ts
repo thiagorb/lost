@@ -1,4 +1,6 @@
-﻿interface LevelStorageData {
+﻿import * as Lost from "./Lost";
+
+interface LevelStorageData {
     time: number;
     stars: number;
 }
@@ -7,7 +9,7 @@ window.onload = () => {
     if (!window.requestAnimationFrame) {
         window.requestAnimationFrame = 
             ["webkit", "moz", "o", "ms"].reduce(function (existing, vendor) {
-                return existing || window[vendor + "RequestAnimationFrame"];
+                return existing || (<any>window)[vendor + "RequestAnimationFrame"];
             }, null)
             || function(callback) { window.setTimeout(callback, 1000 / 60); };
     }
@@ -19,7 +21,7 @@ window.onload = () => {
     //*
     gameView = new Lost.GameView(<HTMLCanvasElement>$("canvas"));
     /*/
-    gameView = new Test.GameView(<HTMLCanvasElement>$("canvas"));
+    gameView = new GameView(<HTMLCanvasElement>$("canvas"));
     //*/
     gameView.start();
 };

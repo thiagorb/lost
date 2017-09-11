@@ -8,7 +8,11 @@
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "node-sass": "^4.5.3"
+  "dependencies": {},
+  "devDependencies": {
+    "node-sass": "^4.5.3",
+    "tsify": "^3.0.3",
+    "typescript": "^2.5.2",
+    "watchify": "^3.9.0"
   }
 }

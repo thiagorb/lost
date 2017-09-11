@@ -1,0 +1,8 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "out": "dist/app.js",
+        "watch": true,
+        "outDir": "dist"
+    }
+}

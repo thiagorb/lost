@@ -102,7 +102,9 @@
     class Ship extends RenderablePolygon {
         sprite: HTMLImageElement;
         public static readonly STEER_ACCELERATION = 0.05 / SPS;
+        static readonly FireSpeed = 1 / SPS;
         
+        fire: number;
         dead: boolean;
         landed: boolean;
         speed: Vectorial.Vector2D = [1, 0];
@@ -134,11 +136,13 @@
 
             this.sprite = new Image();
             this.sprite.src = './ship.svg';
+            this.fire = 0;
 
             this.position = [roomSize[0] / 2, roomSize[1] / 2];
         }
 
         preStep() {
+            this.fire = Math.max(0, this.fire - Ship.FireSpeed);
             if (this.dead) {
                 return;
             }
@@ -151,6 +155,7 @@
 
         accelerate(factor = 1) {
             if (!this.dead) {
+                this.fire = Math.min(1, this.fire + 2 * Ship.FireSpeed);
                 this.landed = false;
                 this.speed[0] += factor * 5 * Math.cos(this.direction) / SPS;
                 this.speed[1] -= factor * 5 * Math.sin(this.direction) / SPS;
@@ -170,8 +175,25 @@
         }
 
         draw(ctx: CanvasRenderingContext2D) {
-            super.draw(ctx);
-            ctx.scale(1, 1);
+            ctx.save();
+            ctx.translate(-this.sprite.width / 2 + 7, 0);
+            ctx.scale(25 * this.fire, 8);
+            const gradient = ctx.createRadialGradient(0, 0, 0.4, 0, 0, 1);
+            gradient.addColorStop(0, 'white');
+            gradient.addColorStop(1, 'rgba(64, 64, 255, 0)');
+            ctx.fillStyle = gradient;
+
+            /*
+            ctx.beginPath();
+            ctx.rect(-100, -100, 200, 200);
+            ctx.fill();
+            */
+
+            ctx.beginPath();
+            ctx.arc(0, 0, 1, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.restore();
             ctx.drawImage(this.sprite, -this.sprite.width / 2, -this.sprite.height / 2);
         }
     }
@@ -210,6 +232,8 @@
                     var py = this.canvas.height / viewSize[1];
                     var p = Math.max(px, py);
 
+                    p = Math.max(p, Math.min(1, 3 / Math.pow(Vectorial.squaredLength(ship.speed), 0.3)));
+
                     //p = 0.1; // to debug
 
                     var effectiveViewWidth = viewSize[0] * p;
@@ -241,10 +265,12 @@
             
             const isNegative = (n: number) => n < 0;
 
+            /*
             const debug = {
                 desiredDirection: 0,
                 deltaDirection: 0
             };
+            //*/
             
             this.addKeyListener(Game.Keys.SPACE, () => {
                 if (ship.landed || ship.dead) {
@@ -255,8 +281,10 @@
                 const desiredDirection = Geometry.direction(0, 0, -ship.speed[0], -ship.speed[1]);
                 const deltaDirection = constrainDeltaAngle(desiredDirection - ship.direction);
 
+                /*
                 debug.deltaDirection = deltaDirection;
                 debug.desiredDirection = desiredDirection;
+                //*/
 
                 if (deltaDirection !== 0) {
                     let turn = 0;
@@ -292,7 +320,7 @@
                 }
             });
 
-            //*
+            /*
             this.addRenderObject({
                 render(ctx: CanvasRenderingContext2D) {
                     ctx.save();
@@ -352,18 +380,23 @@
 
                         // collision
                         if (ship.transformedPolygon.intersectsWithCircle(planet)) {
-                            const limit = 100 / SPS;
-                            console.log(Vectorial.squaredLength(ship.speed));
-                            console.log(limit);
-                            if (Vectorial.squaredLength(ship.speed) < limit) {
+                            const speedLimit = 100 / SPS;
+                            const angleLimit = Math.PI / 20;
+                            const speed = Vectorial.squaredLength(ship.speed);
+                            const landingAngle = Geometry.direction(planet.center[0], planet.center[1], ship.position[0], ship.position[1]);
+                            const deltaAngle = Math.abs(constrainDeltaAngle(ship.direction - landingAngle));
+                            console.log('speed', speed, 'limit', speedLimit);
+                            console.log('angle', deltaAngle, 'limit', angleLimit);
+                            if (speed < speedLimit && deltaAngle < angleLimit) {
                                 ship.landed = true;
                                 breaking = false;
+                                ship.direction = landingAngle;
                                 console.log('landed');
                             } else {
                                 ship.dead = true;
                                 breaking = false;
                                 console.log('died');
-                            }                    
+                            }
                             ship.speed = [0, 0];
                             ship.angularSpeed = 0;
                         }

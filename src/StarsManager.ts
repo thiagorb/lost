@@ -151,7 +151,6 @@ module Lost {
                 this.gameInfoProvider.getRoomSize()[1] * this.MAX_Z
             );
             //*/
-            
             this.layers.forEachItem((layer, minZ) => {
                 this.iterateStorage(layer, 0, minZ, (quadrant, i) => {
                     this.iterateStorage(quadrant, 1, minZ, (stars, j) => {

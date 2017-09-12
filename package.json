@@ -10,9 +10,12 @@
   "license": "ISC",
   "dependencies": {},
   "devDependencies": {
+    "browserify": "^14.4.0",
     "node-sass": "^4.5.3",
+    "svgo": "^0.7.2",
     "tsify": "^3.0.3",
     "typescript": "^2.5.2",
+    "uglify-js": "^3.1.0",
     "watchify": "^3.9.0"
   }
 }

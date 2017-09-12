@@ -1,2 +1,4 @@
 node_modules
 dist
+package.tar.gz
+package/

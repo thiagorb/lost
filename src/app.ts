@@ -1,4 +1,4 @@
-﻿import * as Lost from "./Lost";
+﻿import { GameView } from "./Lost";
 
 interface LevelStorageData {
     time: number;
@@ -19,7 +19,7 @@ window.onload = () => {
     
     var gameView;
     //*
-    gameView = new Lost.GameView(<HTMLCanvasElement>$("canvas"));
+    gameView = new GameView(<HTMLCanvasElement>$("canvas"));
     /*/
     gameView = new GameView(<HTMLCanvasElement>$("canvas"));
     //*/

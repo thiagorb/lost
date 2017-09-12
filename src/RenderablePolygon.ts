@@ -1,17 +1,17 @@
 import { Polygon } from "./Geometry";
-import * as Vectorial from './Vectorial';
-import * as Game from './Game';
+import { Renderable, Steppable } from "./Game";
+import { Vector2D, Matrix } from "./Vectorial";
 
-export default class RenderablePolygon extends Polygon implements Game.Renderable, Game.Steppable {
+export default class RenderablePolygon extends Polygon implements Renderable, Steppable {
     public color: string;
-    public position: Vectorial.Vector2D = [0, 0];
+    public position: Vector2D = [0, 0];
     public direction = 0;
     public transformedPolygon: Polygon;
 
-    constructor(vertices: Vectorial.Matrix, color: string) {
+    constructor(vertices: Matrix, color: string) {
         super(vertices);
         this.color = color;
-        this.transformedPolygon = new Polygon(Vectorial.Matrix.copy(this.vertices));
+        this.transformedPolygon = new Polygon(Matrix.copy(this.vertices));
     }
 
     prepareContext(ctx: CanvasRenderingContext2D) {
@@ -41,10 +41,10 @@ export default class RenderablePolygon extends Polygon implements Game.Renderabl
     }
     
     preStep() {
-        var transform = Vectorial.Matrix.multiply(
-            Vectorial.Matrix.rotate(this.direction),
-            Vectorial.Matrix.translate(this.position[0], this.position[1]));
-        Vectorial.Matrix.multiply(
+        var transform = Matrix.multiply(
+            Matrix.rotate(this.direction),
+            Matrix.translate(this.position[0], this.position[1]));
+        Matrix.multiply(
             this.vertices,
             transform,
             this.transformedPolygon.vertices);

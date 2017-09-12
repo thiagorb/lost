@@ -1,16 +1,16 @@
 import StarsManager from "./StarsManager";
-import * as Vectorial from './Vectorial';
-import * as Game from './Game';
 import { SPS } from "./GlobalConstants";
+import { Vector2D } from "./Vectorial";
+import { View, Keys } from "./Game";
 
-let viewSize: Vectorial.Vector2D = [2000, 2000];
-let viewPosition: Vectorial.Vector2D = [0, 0];
-const roomSize: Vectorial.Vector2D = [40000, 40000];
+let viewSize: Vector2D = [2000, 2000];
+let viewPosition: Vector2D = [0, 0];
+const roomSize: Vector2D = [40000, 40000];
 const maxViewSize = 2000;
 const MIN_Z = 0.2;
 const MAX_Z = 0.8;
 
-export class GameView extends Game.GameView {
+export class GameView extends View {
     constructor(canvas: HTMLCanvasElement) {
         super(canvas);
         const stars = new StarsManager(
@@ -37,11 +37,9 @@ export class GameView extends Game.GameView {
                     20
                 );
 
-
                 var px = this.canvas.width / viewSize[0];
                 var py = this.canvas.height / viewSize[1];
                 var p = Math.max(px, py);
-                //p = 0.2; // to debug
                 var effectiveViewWidth = viewSize[0] * p;
                 var effectiveViewHeight = viewSize[1] * p;
                 ctx.setTransform(p, 0, 0, p, (this.canvas.width - effectiveViewWidth) / 2, (this.canvas.height - effectiveViewHeight) / 2);
@@ -60,19 +58,19 @@ export class GameView extends Game.GameView {
             viewPosition[coord] = (viewPosition[coord] + (speed * 5000) / SPS + roomSize[coord] - border[coord] - border[coord] / 2) % (roomSize[coord] - border[coord]) + border[coord] / 2;
         };
 
-        this.addKeyListener(Game.Keys.UP, () => {
+        this.addKeyListener(Keys.UP, () => {
             nextP(1, -1);
         });
         
-        this.addKeyListener(Game.Keys.DOWN, () => {
+        this.addKeyListener(Keys.DOWN, () => {
             nextP(1, 1);
         });
         
-        this.addKeyListener(Game.Keys.LEFT, () => {
+        this.addKeyListener(Keys.LEFT, () => {
             nextP(0, -1);
         });
         
-        this.addKeyListener(Game.Keys.RIGHT, () => {
+        this.addKeyListener(Keys.RIGHT, () => {
             nextP(0, 1);
         });
 

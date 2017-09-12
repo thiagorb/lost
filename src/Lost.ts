@@ -1,14 +1,14 @@
 ﻿import RenderablePolygon from './RenderablePolygon';
 import StarsManager from './StarsManager';
-import * as Geometry from './Geometry';
-import * as Game from './Game';
-import * as Vectorial from './Vectorial';
 import { SPS } from './GlobalConstants';
 import { Ship } from './Ship';
+import { Vector2D, squaredLength } from './Vectorial';
+import { Circle, direction, bhaskara, squaredDistance } from './Geometry';
+import { Renderable, Steppable, View, Keys } from './Game';
 
-let viewSize: Vectorial.Vector2D = [2000, 2000];
-let viewPosition: Vectorial.Vector2D = [0, 0];
-const roomSize: Vectorial.Vector2D = [40000, 40000];
+let viewSize: Vector2D = [2000, 2000];
+let viewPosition: Vector2D = [0, 0];
+const roomSize: Vector2D = [40000, 40000];
 const maxViewSize = 2000;
 const STARS = 1000;
 const MIN_Z = 0.1;
@@ -19,7 +19,7 @@ const border = [
     viewSize[1] / MIN_Z
 ];
 
-const nextP = (position: Vectorial.Vector2D, coord: 0 | 1, speed: Vectorial.Vector2D) => {
+const nextP = (position: Vector2D, coord: 0 | 1, speed: Vector2D) => {
     position[coord] = (position[coord] + speed[coord] + roomSize[coord] - border[coord] - border[coord] / 2) % (roomSize[coord] - border[coord]) + border[coord] / 2;
 };
 
@@ -30,10 +30,10 @@ const constrain = (x: number, min: number, max: number) => {
 
 const constrainDeltaAngle = (x: number) => constrain(x, -Math.PI, Math.PI);
 
-class RenderableCircle extends Geometry.Circle implements Game.Renderable, Game.Steppable {
+class RenderableCircle extends Circle implements Renderable, Steppable {
     private color: string;
 
-    constructor(center: Vectorial.Vector2D, radius: number, color: string) {
+    constructor(center: Vector2D, radius: number, color: string) {
         super(radius, center);
         this.color = color;
     }
@@ -71,7 +71,7 @@ class RenderableCircle extends Geometry.Circle implements Game.Renderable, Game.
 class Planet extends RenderableCircle {
 }
 
-export class GameView extends Game.GameView {
+export class GameView extends View {
     constructor(canvas: HTMLCanvasElement) {
         super(canvas);
         const stars = new StarsManager(
@@ -93,7 +93,7 @@ export class GameView extends Game.GameView {
                 var py = this.canvas.height / viewSize[1];
                 var p = Math.max(px, py);
 
-                p = Math.max(p, Math.min(1, 3 / Math.pow(Vectorial.squaredLength(ship.speed), 0.3)));
+                p = Math.max(p, Math.min(1, 3 / Math.pow(squaredLength(ship.speed), 0.3)));
 
                 var effectiveViewWidth = viewSize[0] * p;
                 var effectiveViewHeight = viewSize[1] * p;
@@ -111,13 +111,13 @@ export class GameView extends Game.GameView {
 
         let breaking = false;
 
-        this.addKeyListener(Game.Keys.SPACE, () => {
+        this.addKeyListener(Keys.SPACE, () => {
             if (ship.landed || ship.dead) {
                 return;
             }
             breaking = true;
 
-            const desiredDirection = Geometry.direction(0, 0, -ship.speed[0], -ship.speed[1]);
+            const desiredDirection = direction(0, 0, -ship.speed[0], -ship.speed[1]);
             const deltaDirection = constrainDeltaAngle(desiredDirection - ship.direction);
 
             if (deltaDirection !== 0) {
@@ -129,7 +129,7 @@ export class GameView extends Game.GameView {
                 } else {
                     const timeToStopRotation = angularDirection * ship.angularSpeed / Ship.STEER_ACCELERATION;
 
-                    const timesToZeroDelta = Geometry.bhaskara(
+                    const timesToZeroDelta = bhaskara(
                         -angularDirection * Ship.STEER_ACCELERATION / 2,
                         -ship.angularSpeed,
                         deltaDirection
@@ -149,24 +149,24 @@ export class GameView extends Game.GameView {
                 }
             }
 
-            if (Vectorial.squaredLength(ship.speed) > 0.01 && Math.abs(deltaDirection) < Math.PI / 4) {
+            if (squaredLength(ship.speed) > 0.01 && Math.abs(deltaDirection) < Math.PI / 4) {
                 ship.accelerate(0.5);
             }
         });
 
-        this.addKeyListener(Game.Keys.UP, () => {
+        this.addKeyListener(Keys.UP, () => {
             if (!breaking) {
                 ship.accelerate();
             }
         });
         
-        this.addKeyListener(Game.Keys.LEFT, () => {
+        this.addKeyListener(Keys.LEFT, () => {
             if (!breaking) {
                 ship.steerLeft();
             }
         });
         
-        this.addKeyListener(Game.Keys.RIGHT, () => {
+        this.addKeyListener(Keys.RIGHT, () => {
             if (!breaking) {
                 ship.steerRight();
             }
@@ -181,19 +181,19 @@ export class GameView extends Game.GameView {
 
                 if (!ship.dead && !ship.landed) {
                     // gravity
-                    const squaredDistance = Geometry.squaredDistance(ship.position, planet.center);
-                    if (squaredDistance < 4 * planet.squaredRadius) {
-                        const direction = Geometry.direction(ship.position[0], ship.position[1], planet.center[0], planet.center[1]);
-                        ship.speed[0] += SPS * 20 * Math.cos(direction) / squaredDistance;
-                        ship.speed[1] -= SPS * 20 * Math.sin(direction) / squaredDistance;
+                    const squaredDistanceShipPlanet = squaredDistance(ship.position, planet.center);
+                    if (squaredDistanceShipPlanet < 4 * planet.squaredRadius) {
+                        const directionShipPlanet = direction(ship.position[0], ship.position[1], planet.center[0], planet.center[1]);
+                        ship.speed[0] += SPS * 20 * Math.cos(directionShipPlanet) / squaredDistanceShipPlanet;
+                        ship.speed[1] -= SPS * 20 * Math.sin(directionShipPlanet) / squaredDistanceShipPlanet;
                     }
 
                     // collision
                     if (ship.transformedPolygon.intersectsWithCircle(planet)) {
                         const speedLimit = 100 / SPS;
                         const angleLimit = Math.PI / 20;
-                        const speed = Vectorial.squaredLength(ship.speed);
-                        const landingAngle = Geometry.direction(planet.center[0], planet.center[1], ship.position[0], ship.position[1]);
+                        const speed = squaredLength(ship.speed);
+                        const landingAngle = direction(planet.center[0], planet.center[1], ship.position[0], ship.position[1]);
                         const deltaAngle = Math.abs(constrainDeltaAngle(ship.direction - landingAngle));
                         console.log('speed', speed, 'limit', speedLimit);
                         console.log('angle', deltaAngle, 'limit', angleLimit);

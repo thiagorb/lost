@@ -1,5 +1,5 @@
-import * as Vectorial from './Vectorial';
-import * as Game from './Game';
+import { Vector2D } from './Vectorial';
+import { Renderable } from './Game';
 
 class MapperStorage<T> {
     step: number;
@@ -53,17 +53,17 @@ class MapperStorage<T> {
 type Star = {0: number, 1: number, 2: number};
 
 interface GameInfoProvider {
-    getViewSize(): Vectorial.Vector2D;
+    getViewSize(): Vector2D;
     
-    getViewPosition(): Vectorial.Vector2D;
+    getViewPosition(): Vector2D;
 
-    getRoomSize(): Vectorial.Vector2D;
+    getRoomSize(): Vector2D;
 }
 
-export default class StarsManager implements Game.Renderable {
+export default class StarsManager implements Renderable {
     private readonly layers = new MapperStorage<MapperStorage<MapperStorage<Array<Star>>>>(this.MIN_Z, this.MAX_Z, this.Z_LAYERS);
     private readonly projector = new Projector(this.gameInfoProvider);
-    public speed: Vectorial.Vector2D = [0, 0];
+    public speed: Vector2D = [0, 0];
 
     constructor(
         private readonly MIN_Z: number,
@@ -126,52 +126,15 @@ export default class StarsManager implements Game.Renderable {
         ctx.save();
         ctx.strokeStyle = '#fff';
         ctx.lineCap = 'round';
-        /*
         
-        ctx.strokeStyle = '#f0f';
-        ctx.strokeRect(
-            0,
-            0,
-            this.gameInfoProvider.getRoomSize()[0], 
-            this.gameInfoProvider.getRoomSize()[1]
-        );
-
-        ctx.strokeStyle = '#f00';
-        ctx.strokeRect(
-            this.gameInfoProvider.getViewPosition()[0],
-            this.gameInfoProvider.getViewPosition()[1],
-            this.gameInfoProvider.getViewSize()[0], 
-            this.gameInfoProvider.getViewSize()[1]
-        );
-
-        ctx.strokeStyle = '#ff0';
-        ctx.strokeRect(
-            this.projector.fromX(0, this.MAX_Z),
-            this.projector.fromY(0, this.MAX_Z),
-            this.gameInfoProvider.getRoomSize()[0] * this.MAX_Z,
-            this.gameInfoProvider.getRoomSize()[1] * this.MAX_Z
-        );
-        //*/
         this.layers.forEachItem((layer, minZ) => {
             this.iterateStorage(layer, 0, minZ, (quadrant, i) => {
                 this.iterateStorage(quadrant, 1, minZ, (stars, j) => {
-                    /*
-                    ctx.strokeStyle = `rgb(${256 * minZ | 0}, ${256 * (1 - minZ) | 0}, 0)`;
-                    ctx.strokeRect(
-                        this.projector.fromX(layer.getValue(i), minZ),
-                        this.projector.fromY(quadrant.getValue(j), minZ),
-                        layer.step * minZ,
-                        quadrant.step * minZ
-                    );
-                    //*/
-
                     stars.forEach(star => {
                         const z = star[2];
-                        const x = this.projector.fromX(star[0], z);
-                        const y = this.projector.fromY(star[1], z);
+                        const x = this.projector.from(0, star[0], z);
+                        const y = this.projector.from(1, star[1], z);
                         ctx.lineWidth = 10 * z;
-
-                        //ctx.lineWidth = 100 * z; // to debug
 
                         ctx.beginPath();
                         ctx.moveTo(x, y);
@@ -214,25 +177,5 @@ export class Projector
     to(i: 0 | 1, x: number, z: number)
     {
         return this.from(i, x, 1 / z);
-    }
-    
-    fromX(x: number, z: number)
-    {
-        return this.from(0, x, z);
-    }
-
-    fromY(x: number, z: number)
-    {
-        return this.from(1, x, z);
-    }
-    
-    toX(x: number, z: number)
-    {
-        return this.to(0, x, z);
-    }
-
-    toY(x: number, z: number)
-    {
-        return this.to(1, x, z);
     }
 }

@@ -1,4 +1,4 @@
-﻿import * as Vectorial from './Vectorial';
+﻿import { Matrix, Vector2D } from "./Vectorial";
 
 export const bhaskara = (a: number, b: number, c: number) => {
     const disc = b * b - 4 * a * c;
@@ -69,7 +69,7 @@ export interface Shape {
 export class Polygon implements Shape {
     vertices: Array<Array<number>>;
 
-    constructor(vertices: Vectorial.Matrix) {
+    constructor(vertices: Matrix) {
         this.vertices = [];
         for (var i = 0; i < vertices.length; i++) {
             this.vertices.push([vertices[i][0], vertices[i][1], 1]);
@@ -98,7 +98,7 @@ export class Polygon implements Shape {
     }
 }
 
-export const squaredDistance = (p1: Vectorial.Vector2D, p2: Vectorial.Vector2D) => {
+export const squaredDistance = (p1: Vector2D, p2: Vector2D) => {
     const dx = p1[0] - p2[0];
     const dy = p1[1] - p2[1];
     return dx * dx + dy * dy;
@@ -110,10 +110,10 @@ export const direction = (x1: number, y1: number, x2: number, y2: number) => {
 
 export class Circle implements Shape {
     radius: number;
-    center: Vectorial.Vector2D;
+    center: Vector2D;
     squaredRadius: number;
 
-    constructor(radius: number, center: Vectorial.Vector2D)
+    constructor(radius: number, center: Vector2D)
     {
         this.radius = radius;
         this.squaredRadius = radius * radius;

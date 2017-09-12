@@ -7,7 +7,7 @@ export interface Renderable {
     render(g: CanvasRenderingContext2D): void;
 }
 
-export class GameView {
+export class View {
     stepToken: number;
     countFPSToken: number;
     stepObjects: Array<Steppable> = new Array();

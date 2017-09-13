@@ -4,12 +4,13 @@ import { Vector2D, Matrix } from "./Vectorial";
 
 export default class RenderablePolygon extends Polygon implements Renderable, Steppable {
     public color: string;
-    public position: Vector2D = [0, 0];
+    public position: Vector2D;
     public direction = 0;
     public transformedPolygon: Polygon;
 
-    constructor(vertices: Matrix, color: string) {
+    constructor(position: Vector2D, vertices: Matrix, color: string) {
         super(vertices);
+        this.position = position;
         this.color = color;
         this.transformedPolygon = new Polygon(Matrix.copy(this.vertices));
     }

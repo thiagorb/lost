@@ -1,6 +1,7 @@
 import RenderablePolygon from "./RenderablePolygon";
 import { Vector2D } from "./Vectorial";
 import { SPS } from "./GlobalConstants";
+import Resource from "./Resource";
 
 export class Ship extends RenderablePolygon {
     sprite: HTMLImageElement;
@@ -10,11 +11,12 @@ export class Ship extends RenderablePolygon {
     fire: number;
     dead: boolean;
     landed: boolean;
-    speed: Vector2D = [1, 0];
+    speed: Vector2D = [0, 0];
     angularSpeed: number = 0;
 
-    constructor() {
+    constructor(private readonly fuel: Resource, position: Vector2D) {
         super(
+            position,
             [
                 [-30, 7],
                 [-35, 26],
@@ -24,7 +26,7 @@ export class Ship extends RenderablePolygon {
                 [0, 12],
                 [-35, 26],
                 [26, 8],
-                [-35, 0],
+                [35, 0],
                 [26, -8],
                 [-35, -26],
                 [0, -12],
@@ -47,35 +49,39 @@ export class Ship extends RenderablePolygon {
         if (this.dead) {
             return;
         }
+
         super.preStep();
         this.direction += this.angularSpeed;
     }
 
     accelerate(factor = 1) {
-        if (!this.dead) {
+        if (!this.dead && this.fuel.value > 0) {
             this.fire = Math.min(factor, this.fire + 2 * Ship.FireSpeed);
             this.landed = false;
             this.speed[0] += factor * 5 * Math.cos(this.direction) / SPS;
             this.speed[1] -= factor * 5 * Math.sin(this.direction) / SPS;
+            this.fuel.consume(factor);
         }
     }
     
     steerLeft() {
-        if (!this.landed && !this.dead) {
+        if (!this.landed && !this.dead && this.fuel.value > 0) {
             this.angularSpeed += Ship.STEER_ACCELERATION;
+            this.fuel.consume();
         }
     }
             
     steerRight() {
-        if (!this.landed && !this.dead) {
+        if (!this.landed && !this.dead && this.fuel.value > 0) {
             this.angularSpeed -= Ship.STEER_ACCELERATION;
+            this.fuel.consume();
         }
     }
 
     draw(ctx: CanvasRenderingContext2D) {
         super.draw(ctx);
         ctx.save();
-        ctx.translate(-this.sprite.width / 2 + 7, 0);
+        ctx.translate(-this.sprite.width / 2 + 5, 0);
         ctx.scale(25 * this.fire, 8);
         const gradient = ctx.createRadialGradient(0, 0, 0.4, 0, 0, 1);
         gradient.addColorStop(0, 'white');

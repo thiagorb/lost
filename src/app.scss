@@ -1,6 +1,7 @@
 $default-font-size: 3vmin;
 $default-line-height: 4vmin;
 body {
+    background: #000;
     font-family: sans-serif;
     margin: 0;
     position: relative;
@@ -26,32 +27,6 @@ p {
     margin: 2vmin 1vmin;
 }
 
-$scrollable-padding: 1vmin;
-.scrollable {
-    overflow-y: auto;
-    margin: 1vmin 0;
-    padding: $scrollable-padding;
-    box-shadow: inset 0 0 2vmin #444;
-    border-radius: 1vmin;
-    display: block;
-    
-    &::-webkit-scrollbar {
-        width: 2vmin;
-    }
-    
-    &::-webkit-scrollbar-track {
-        background-color: darkslateblue;
-        box-shadow: inset 0 0 1vmin rgba(0, 0, 0, 0.5);
-        border-radius: 1vmin;
-    }
-    
-    &::-webkit-scrollbar-thumb {
-        background-color: darkgrey;
-        box-shadow: inset 0 0 1vmin rgba(0, 0, 0, 0.5);
-        border-radius: 1vmin;
-    }
-}
-
 canvas {
     display: block;
     width: 100%;
@@ -64,73 +39,32 @@ canvas {
     -webkit-tap-highlight-color: none;
 }
 
-#shadow {
-    display: block;
-    width: 100%;
-    height: 100vh;
-    position: absolute;
-    top: 0;
-    background-color: black;
-    opacity: 0.25;
-    -webkit-transition: opacity 0.5s;
-    -moz-transition: opacity 0.5s;
-    -ms-transition: opacity 0.5s;
-    -o-transition: opacity 0.5s;
-    transition: opacity 0.5s;
-}
-
-$dialog-width: 80vmin;
-$dialog-height: 60vmin;
-$dialog-padding: 4vmin;
-$dialog-content-width: $dialog-width - 2 * $dialog-padding;
-$dialog-content-height: $dialog-height - 2 * $dialog-padding;
-
-#dialog {
-    width: $dialog-width;
-    height: $dialog-height;
-    left: 50%;
-    top: 50%;
-    position: absolute;
-    margin-left: -$dialog-width / 2;
-    margin-top: -$dialog-height / 2;
-    background: linear-gradient(#666, #444);
-    box-sizing: border-box;
-    border-radius: 5vmin;
-    padding: $dialog-padding;
-    box-shadow: 0 0 3vmin darkslateblue;
-    text-align: center;
-    -webkit-transition: opacity 0.5s;
-    -moz-transition: opacity 0.5s;
-    -ms-transition: opacity 0.5s;
-    -o-transition: opacity 0.5s;
-    transition: opacity 0.5s;
-    
-    >div {
-        display: none;
-        
-        &.active {
-            display: block;
-        }
-    }
-}
-
 $button-height: 7vmin;
-$button-border: 0.5vmin;
+$button-border: 0.3vmin;
 button {
-    background: #6f0;
+    background: linear-gradient(
+        to bottom, 
+        rgb(255, 255, 255) 0, 
+        rgb(164, 164, 255) 50%, 
+        rgb(32, 32, 192) 51%,
+        rgb(128, 128, 255) 100%
+    );
+    opacity: 0.8;
     padding: 0 2vmin;
     height: $button-height;
     line-height: $button-height - 2 * $button-border;
-    border-radius: 2vmin;
-    border: $button-border solid white;
+    border-radius: 1.5vmin;
+    border: $button-border solid #338;
     cursor: pointer;
+    transition: opacity 0.5s, box-shadow 0.5s;
     
     &:hover {
-        background-color: #9f5;
+        opacity: 1;
+        box-shadow: 0 0 1vmin 0 rgba(255, 255, 255, 0.5);
     }
     
     &:disabled {
-        background-color: #999;
+        background: #999;
     }
     
     &:focus {
@@ -144,131 +78,67 @@ button {
 
 $title-height: 10vmin;
 $title-margin-bottom: 5vmin;
-#title {
-    margin-bottom: $title-margin-bottom;
+.title {
+    margin: 0 auto $title-margin-bottom;
     line-height: $title-height;
     font-size: 9vmin;
-    width: 100%;
-}
-
-#menu {
-    margin: ($dialog-content-height - ($title-height + $title-margin-bottom + $button-height)) / 2 0;
-}
-
-$levels-list-margin-v: 2vmin;
-#levels-list {
-    height: $dialog-content-height - $default-line-height - 2 * $levels-list-margin-v - 2 * $scrollable-padding - $button-height;
-    margin: $levels-list-margin-v 0;
-    padding: $scrollable-padding;
-    box-shadow: inset 0 0 2vmin #444;
-    border-radius: 1vmin;
-    display: block;
-    
-    tr {
-        cursor: pointer;
-        
-        &:hover > td {
-            background: #999;
-        }
-    }
-    
-    td {
-        padding: 1vmin;
-    }
-    
-    td:first-child {
-        width: 100%;
-        text-align: left;
-    }
-    
-    td:nth-child(2) {
-        min-width: 15vmin;
-        text-align: left;
-    }
-    
-    td:last-child {
-        min-width: 15vmin;
-        text-align: right;
-    }
-}
-
-.stars {
-    >svg {
-        width: 3vmin;
-        height: 3vmin;
-        fill: rgba(0, 0, 0, 0.2);
-    }
-    
-    &.star-1, &.star-2, &.star-3, &.star-4, &.star-5 {
-        >svg:nth-child(5) {
-            fill: yellow;
-        }
-    }
-    
-    &.star-2, &.star-3, &.star-4, &.star-5 {
-        >svg:nth-child(4) {
-            fill: yellow;
-        }
-    }
-    
-    &.star-3, &.star-4, &.star-5 {
-        >svg:nth-child(3) {
-            fill: yellow;
-        }
-    }
-    
-    &.star-4, &.star-5 {
-        >svg:nth-child(2) {
-            fill: yellow;
-        }
-    }
-    
-    &.star-5 {
-        >svg:nth-child(1) {
-            fill: yellow;
-        }
-    }
-}
-
-$help-content-margin-v: 2vmin;
-#help .content {
-    height: $dialog-content-height - $default-line-height - 2 * $help-content-margin-v - 2 * $scrollable-padding - $button-height;
-    margin: $help-content-margin-v 0;
-    text-align: left;
-}
-
-$after-game-content-margin-v: 2vmin;
-#after-game{
-    .content {
-        height: $dialog-content-height - $default-line-height - 2 * $after-game-content-margin-v - $button-height;
-        margin: $after-game-content-margin-v 0;
-    }
-    
-    .score {
-        margin: 3vmin 0 -5vmin 0;
-    }
-    
-    .highscore {
-        margin-top: 8vmin;
-    }
-}
-
-#time-display {
-    top: 50%;
-    width: 100%;
-    line-height: 0;
+    width: 70vmin;
     text-align: center;
-    font-size: 10vmin;
+    text-decoration: overline;
+}
+
+.view {
     position: absolute;
-    -webkit-transition: top 0.5s, font-size 0.5s;
-    -moz-transition: top 0.5s, font-size 0.5s;
-    -ms-transition: top 0.5s, font-size 0.5s;
-    -o-transition: top 0.5s, font-size 0.5s;
-    transition: top 0.5s, font-size 0.5s;
-    visibility: hidden;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
     
-    &.playing {
-        font-size: 5vmin;
-        top: 5vmin;
+    &.active {
+        display: block;
     }
+}
+
+.content {
+    position: absolute;
+    float: left;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    > button {
+        margin: 0 auto 5vmin;
+        display: block;
+        width: 130px;
+    }
+}
+
+#help .title {
+    font-size: 4.5vmin;
+    width: 35vmin;
+    line-height: $title-height / 2;
+}
+
+#transition {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    transition: 1s;
+}
+
+#transition.visible {
+    opacity: 1;
+}
+
+#transition.off {
+    display: none;
+}
+
+.invisible {
+    display: none;
 }

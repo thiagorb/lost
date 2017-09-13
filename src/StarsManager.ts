@@ -1,5 +1,6 @@
 import { Vector2D } from './Vectorial';
 import { Renderable } from './Game';
+import { GameInfoProvider } from './Lost';
 
 class MapperStorage<T> {
     step: number;
@@ -52,17 +53,9 @@ class MapperStorage<T> {
 
 type Star = {0: number, 1: number, 2: number};
 
-interface GameInfoProvider {
-    getViewSize(): Vector2D;
-    
-    getViewPosition(): Vector2D;
-
-    getRoomSize(): Vector2D;
-}
-
 export default class StarsManager implements Renderable {
     private readonly layers = new MapperStorage<MapperStorage<MapperStorage<Array<Star>>>>(this.MIN_Z, this.MAX_Z, this.Z_LAYERS);
-    private readonly projector = new Projector(this.gameInfoProvider);
+    private readonly projector = new Projector(this.gameInfo);
     public speed: Vector2D = [0, 0];
 
     constructor(
@@ -70,21 +63,21 @@ export default class StarsManager implements Renderable {
         private readonly MAX_Z: number,
         private readonly Z_LAYERS: number,
         private readonly STARS: number,
-        private readonly gameInfoProvider: GameInfoProvider
+        private readonly gameInfo: GameInfoProvider
     ) {
         this.layers.forEachValue((minZ, layerIndex) => {
             const layer = new MapperStorage<MapperStorage<Array<Star>>>(
                 0, 
-                this.gameInfoProvider.getRoomSize()[0],
-                Math.round(this.gameInfoProvider.getRoomSize()[0] / (this.gameInfoProvider.getViewSize()[0] / minZ))
+                this.gameInfo.getRoomSize()[0],
+                Math.round(this.gameInfo.getRoomSize()[0] / (this.gameInfo.getViewSize()[0] / minZ))
             );
             this.layers.setIndex(layerIndex, layer);
 
             layer.forEachValue((minX, quadrantIndex) => {
                 const quadrant = new MapperStorage<Array<Star>>(
                     0, 
-                    this.gameInfoProvider.getRoomSize()[1],
-                    Math.round(this.gameInfoProvider.getRoomSize()[1] / (this.gameInfoProvider.getViewSize()[1] / minZ))
+                    this.gameInfo.getRoomSize()[1],
+                    Math.round(this.gameInfo.getRoomSize()[1] / (this.gameInfo.getViewSize()[1] / minZ))
                 );
 
                 layer.setIndex(quadrantIndex, quadrant);
@@ -98,9 +91,9 @@ export default class StarsManager implements Renderable {
         for (let i = 0; i < this.STARS; i++) {
             const z = this.MIN_Z + Math.random() * (this.MAX_Z - this.MIN_Z);
             const layer = this.layers.get(z);
-            const x = Math.random() * (this.gameInfoProvider.getRoomSize()[0] - this.gameInfoProvider.getViewSize()[0] / this.MIN_Z);
+            const x = Math.random() * (this.gameInfo.getRoomSize()[0] - this.gameInfo.getViewSize()[0] / this.MIN_Z);
             const quadrant = layer.get(x);
-            const y = Math.random() * (this.gameInfoProvider.getRoomSize()[1] - this.gameInfoProvider.getViewSize()[1] / this.MIN_Z);
+            const y = Math.random() * (this.gameInfo.getRoomSize()[1] - this.gameInfo.getViewSize()[1] / this.MIN_Z);
             this.addStar(x, y, z);
         }
     }
@@ -109,13 +102,13 @@ export default class StarsManager implements Renderable {
         const layer = this.layers.get(z);
         const quadrant = layer.get(x);
 
-        if (x < this.gameInfoProvider.getViewSize()[0] / this.MIN_Z) {
-            const newX = this.gameInfoProvider.getRoomSize()[0] - this.gameInfoProvider.getViewSize()[0] / this.MIN_Z + x;
+        if (x < this.gameInfo.getViewSize()[0] / this.MIN_Z) {
+            const newX = this.gameInfo.getRoomSize()[0] - this.gameInfo.getViewSize()[0] / this.MIN_Z + x;
             layer.get(newX).get(y).push([newX, y, z]);
         }
 
-        if (y < this.gameInfoProvider.getViewSize()[1] / this.MIN_Z) {
-            const newY = this.gameInfoProvider.getRoomSize()[1] - this.gameInfoProvider.getViewSize()[1] / this.MIN_Z + y;
+        if (y < this.gameInfo.getViewSize()[1] / this.MIN_Z) {
+            const newY = this.gameInfo.getRoomSize()[1] - this.gameInfo.getViewSize()[1] / this.MIN_Z + y;
             this.addStar(x, newY, z);
         }
         
@@ -149,8 +142,8 @@ export default class StarsManager implements Renderable {
 
     iterateStorage<T>(storage: MapperStorage<T>, coord: 0 | 1, z: number, callback: (t: T, i: number) => any)
     {
-        let minI = this.normalizeIndex(storage, storage.getIndex(this.projector.to(coord, this.gameInfoProvider.getViewPosition()[coord], z)));
-        let maxI = this.normalizeIndex(storage, storage.getIndex(this.projector.to(coord, this.gameInfoProvider.getViewPosition()[coord] + this.gameInfoProvider.getViewSize()[coord], z)));
+        let minI = this.normalizeIndex(storage, storage.getIndex(this.projector.to(coord, this.gameInfo.getViewPosition()[coord], z)));
+        let maxI = this.normalizeIndex(storage, storage.getIndex(this.projector.to(coord, this.gameInfo.getViewPosition()[coord] + this.gameInfo.getViewSize()[coord], z)));
         for (let i = minI; i <= maxI; i++) {
             callback(storage.storage[i], i);
         }

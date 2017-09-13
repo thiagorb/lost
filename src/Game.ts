@@ -22,11 +22,11 @@ export class View {
     public running = false;
 
     constructor(canvas: HTMLCanvasElement) {
-        window.addEventListener("resize", () => this.resizeCanvas());
         this.canvas = canvas;
         this.resizeCanvas();
         this.keyboardController = new KeyboardController();
         this.addStepObject(this.keyboardController);
+        this.resizeCanvas = this.resizeCanvas.bind(this);
     }
 
     addStepObject(o: Steppable) {
@@ -49,7 +49,7 @@ export class View {
     }
 
     render() {
-        var g = this.canvas.getContext("2d");
+        var g = this.canvas.getContext('2d');
         g.setTransform(1, 0, 0, 1, 0, 0);
         g.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.renderObjects.forEach(o => o.render(g));
@@ -59,7 +59,10 @@ export class View {
 
     start(sps: number) {
         this.stop();
+        this.keyboardController.stop();
+        window.addEventListener('resize', this.resizeCanvas);
         this.running = true;
+        this.keyboardController.start();
         this.step();
         window.requestAnimationFrame(() => this.render());
         this.stepToken = setInterval(() => this.step(), 1000 / sps);
@@ -72,6 +75,7 @@ export class View {
     }
 
     stop() {
+        window.removeEventListener('resize', this.resizeCanvas);
         if (this.stepToken) clearInterval(this.stepToken);
         if (this.countFPSToken) clearInterval(this.countFPSToken);
         this.stepToken = null;
@@ -96,12 +100,28 @@ class KeyboardController implements Steppable {
     keyListeners: {[keyCode: number]: KeyListener[]} = {};
 
     constructor() {
-        document.addEventListener("keydown", ev => {
-            this.pressedKeys[ev.keyCode] = true;
-        });
-        document.addEventListener("keyup", ev => {
-            this.pressedKeys[ev.keyCode] = false;
-        });
+        this.onKeyDown = this.onKeyDown.bind(this);
+        this.onKeyUp = this.onKeyUp.bind(this);
+    }
+
+    start()
+    {
+        document.addEventListener('keydown', this.onKeyDown);
+        document.addEventListener('keyup', this.onKeyUp);
+    }
+
+    stop()
+    {
+        document.removeEventListener('keydown', this.onKeyDown);
+        document.removeEventListener('keyup', this.onKeyUp);
+    }
+
+    onKeyDown(ev: KeyboardEvent) {
+        this.pressedKeys[ev.keyCode] = true;
+    }
+
+    onKeyUp(ev: KeyboardEvent) {
+        this.pressedKeys[ev.keyCode] = false;
     }
 
     preStep() {

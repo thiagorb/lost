@@ -12,7 +12,7 @@ let viewSize: Vector2D = [2000, 2000];
 let viewPosition: Vector2D = [0, 0];
 const roomSize: Vector2D = [400000, 400000];
 const maxViewSize = 2000;
-const STARS = 1000000;
+const STARS = 500000;
 const MIN_Z = 0.1;
 const MAX_Z = 0.9;
 

@@ -1,0 +1,11 @@
+- name: deploy
+  service: lostservice
+  command: ls
+- type: parallel
+  steps:
+  - name: deploy1
+    service: lostservice
+    command: ls /
+  - name: deploy2
+    service: lostservice
+    command: ls

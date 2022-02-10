@@ -11,7 +11,7 @@
   "dependencies": {},
   "devDependencies": {
     "browserify": "^14.4.0",
-    "node-sass": "^4.5.3",
+    "node-sass": "^7.0.0",
     "svgo": "^0.7.2",
     "tsify": "^3.0.3",
     "typescript": "^2.5.2",
